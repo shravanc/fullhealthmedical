@@ -57,12 +57,14 @@ class Parser
 
   private
 
+  # Reads all the lines and store it in a lines variable
   def fetch_lines(input_path)
     File.open(input_path).each do |line|
       @lines << line.strip
     end
   end
 
+  # Based on the indicator tests and comments variable is populated respectively with all the required field
   def parse_lines
     @lines.each do |line|
       data = line.split('|')
@@ -76,6 +78,9 @@ class Parser
     end
   end
 
+  # Parse the tests format like below:
+  # OBX|1|A250|NEGATIVE|
+  # return: {'type'=> 'OBX', 'id'=> '1', 'code'=> 'A250', 'value'=>'NEGATIVE'}
   def parse_tests(data)
     test = {}
     Parser::TEST_INFO_ORDER.each_with_index do |info, i|
@@ -84,9 +89,11 @@ class Parser
     test
   end
 
+  # Parse the comments format like below:
+  # NTE|1|Comment for NEGATIVE result|
+  # return: {'type'=> 'NTE', 'id' => 1, 'text' => 'Commnt for NEGATIVE reuslt'}
   def parse_comments(data)
     comment = {}
-
     Parser::CMNT_INFO_ORDER.each_with_index do |info, i|
       comment[info] = data[i]
     end
@@ -99,10 +106,14 @@ class Parser
     comment
   end
 
+  # Mapping btw the  code and the format
+  # Ex: for "C100" returns 'float'
   def fetch_format(code)
     Parser::MAPPING[code]
   end
 
+  # For code and the value it returns the format
+  # Ex: "C100", 2 returns 2.0
   def fetch_result(code, value)
     case Parser::MAPPING[code]
     when 'float'
@@ -114,6 +125,7 @@ class Parser
     end
   end
 
+  # Returns the aggregated comments for an id given
   def fetch_comments(id)
     @test_comments[id]['comments']
   end
